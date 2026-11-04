@@ -25,3 +25,4 @@
   .footer{padding-top:20px}
 }
 .heading-arrow{font-family:Arial,Helvetica,sans-serif}
+.flap{flex-shrink:0}.flap-text{max-width:100%;overflow:hidden}.product-cell{min-width:0}.quantity{flex-shrink:0}.empty-board{color:#a69a75;font-size:18px;letter-spacing:2px;text-align:center}
