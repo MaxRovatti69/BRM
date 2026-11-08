@@ -1,4 +1,4 @@
-name: Checks
+name: PHP checks
 on:
   push:
   pull_request:
@@ -7,11 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: shivammathur/setup-php@v2
         with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run lint
-      - run: npm run build
+          php-version: '8.2'
+          extensions: pdo_sqlite
+          coverage: none
+      - run: find app config public scripts tests -name '*.php' -print0 | xargs -0 -n1 php -l
+      - run: php tests/run.php
+      - run: php tests/http.php

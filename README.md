@@ -1,83 +1,101 @@
-# BRM Bike Rental Departure Board
+# Binario Zero · Bike Rental Departure Board
 
-Esposizione prenotazioni su tabellone. Next.js, TypeScript e Tailwind CSS, con il
-design ferroviario a palette e un archivio SQLite persistente per webhook BRM.
+Tabellone ferroviario a palette con logo Binario Zero e lettere/numeri arancioni
+(`#ff5700`). Backend **PHP 8.2+**, database **SQLite**, frontend **React nel browser**.
+Non servono Node.js, npm, Python, Composer o una compilazione JavaScript.
 
-## Avvio
+[Anteprima Full HD](docs/preview.png)
 
-Richiede **Node.js 24** e npm.
+## Avvio immediato
+
+Installare PHP con `PDO` e `pdo_sqlite`. Su Debian/Ubuntu: pacchetti `php-cli`
+e `php-sqlite3`. Verificare con `php -v` e `php -m`.
 
 ```sh
-npm ci
-cp .env.example .env.local
-npm run dev
+php -S 0.0.0.0:8080 -t public router.php
 ```
 
-Aprire `/board` sulla porta 3000, usando l'inoltro porte se il progetto gira in
-Codespaces. `/` reindirizza a `/board`. `BOARD_MODE=demo` mostra solo dati sintetici.
-Il server ascolta su tutte le interfacce: non esporre il live su Internet senza HTTPS.
+Aprire `/board` sulla porta **8080**. In Codespaces inoltrare quella porta.
+La modalità predefinita è DEMO: otto prenotazioni sintetiche, nessun dato reale.
+Il server PHP integrato è per sviluppo; per produzione usare Apache o Nginx con PHP-FPM.
 
 ## Prenotazioni reali
 
-Seguire [la guida webhook e pubblicazione](docs/brm-webhooks.md). In sintesi:
-
-- `BOARD_MODE=live`, namespace esatto BRM, fuso orario del negozio;
-- chiave URL del ricevitore e credenziali separate per il tabellone;
-- Node sempre attivo, singola istanza e disco persistente;
-- webhook `reservation.create` / `reservation.update`, polling del display ogni 5 s;
-- un prodotto per riga, paginazione automatica ogni 12 s oltre le 8 righe;
-- filtro del giorno e protezione contro duplicati e aggiornamenti fuori ordine.
-
-**Da confermare prima dell'uso operativo:** gli articoli forniti non documentano
-lo stato effettivo annullato né firme BRM. Si visualizzano solo `status=ok`,
-`stage=confirmed/provisional`, `draft=false`; gli altri stati sono esclusi senza
-attribuire loro un significato inventato. È necessario un test BRM reale e la
-conferma degli annullamenti dal consulente. Nessuna importazione storica automatica.
-
-## Controlli e produzione
+Copiare `config/local.example.php` in `config/local.php` **solo se quest'ultimo non
+esiste già**. Il file locale non va pubblicato in Git ed è esterno alla cartella web.
+Impostare `BOARD_MODE=live`, il namespace BRM esatto, il fuso orario del negozio,
+la chiave webhook, utente/password del tabellone e percorsi persistenti di database
+e log. Si possono usare in alternativa variabili d'ambiente con gli stessi nomi.
+Generare due segreti distinti:
 
 ```sh
-npm test
-npm run lint
-npm run typecheck
-npm run build
-npm start
+php -r 'echo bin2hex(random_bytes(32)), PHP_EOL;'
 ```
 
-In produzione la modalità predefinita è live (in sviluppo demo); impostarla sempre
-esplicitamente. Configurare `.env.local` o le variabili del provider prima di
-avviare il server. `/api/health` controlla solo che il processo risponda.
+Il tabellone live e `/api/board` richiedono HTTP Basic auth del nostro servizio,
+separata dalle credenziali BRM. Non esporre dati reali senza HTTPS.
 
-Per provare il flusso con dati sintetici su un database locale di test:
+Endpoint conservati:
+
+- `POST /api/webhooks/brm?key=CHIAVE_SEGRETA`: ricezione BRM.
+- `GET /api/board`: prenotazioni del giorno, ordinate per ora.
+- `GET /api/health`: verifica di liveness, senza dati personali.
+- `/board`: display per televisore; `/` reindirizza qui.
+
+Leggere [la guida webhook e hosting PHP](docs/brm-webhooks.md) prima della produzione.
+Gli stati annullati effettivi restano da confermare con il consulente BRM: si mostrano
+solo `status=ok`, `stage=confirmed/provisional`, `draft=false`. Gli altri stati sono
+esclusi senza attribuire loro un significato non documentato.
+
+## Test senza Node/Python
 
 ```sh
-npm run simulate -- create
-npm run simulate -- update
-npm run simulate -- exclude
-npm run simulate -- tomorrow
+php tests/run.php
+php tests/http.php
+find app config public scripts tests -name '*.php' -print0 | xargs -0 -n1 php -l
 ```
 
-Vedere la guida per le variabili richieste e il significato dei comandi. I test
-non contattano BRM e non inviano dati reali.
+Test facoltativo con Chromium installato e il server demo avviato:
 
-## Televisore
+```sh
+php tests/browser.php http://127.0.0.1:8080/board
+```
 
-Layout per 1920×1080, zoom al 100%. Pulsante schermo intero in alto a destra,
-Esc per uscire. Orologio nel fuso del negozio, aggiornato ogni secondo. I dispositivi
-piccoli permettono lo scorrimento orizzontale. Animazioni compatibili con la
-preferenza di movimento ridotto. La demo è sempre indicata e resta separata dai
-dati reali. I dati dell'ultimo polling vengono conservati a schermo in caso di
-errore di rete, con indicazione NON SINCRONIZZATO.
+Il test browser è scritto in PHP e usa il protocollo Chrome DevTools: verifica
+React, logo, arancione, righe demo, Full HD, orologio, mobile e movimento ridotto.
+`CHROMIUM_BIN` permette di scegliere il binario Chromium del proprio sistema.
 
-## File principali
+Con server e database **di test** configurati in modalità live:
 
-- `src/lib/brm.ts`: validazione e normalizzazione del formato documentato.
-- `src/lib/reservation-store.ts`: database, transazioni e idempotenza.
-- `src/app/api/webhooks/brm/route.ts`: ricezione POST e log senza payload.
-- `src/app/api/board/route.ts`: prenotazioni del giorno.
-- `src/proxy.ts`: protezione del tabellone live con HTTP Basic auth.
-- `src/app/board/page.tsx`: display ferroviario e aggiornamenti.
-- `tests/`: test sintetici; `scripts/simulate-brm.ts`: invio webhook locali.
-- `render.yaml`: opzione di deploy su Render, se non si usa il proprio hosting.
+```sh
+php scripts/simulate.php create
+php scripts/simulate.php update
+php scripts/simulate.php exclude
+php scripts/simulate.php tomorrow
+```
 
-Non pubblicare `.env.local`, database, backup o URL webhook completi con la chiave.
+`exclude` prova uno stato sconosciuto sintetico, non uno stato annullato BRM verificato.
+
+## Televisore e interfaccia
+
+Layout 1920×1080 al 100% di zoom, schermo intero, orologio del negozio, polling ogni
+5 secondi. Più prodotti producono righe distinte, con rotazione di otto righe ogni
+12 secondi. In caso di errore si conserva l'ultimo risultato con NON SINCRONIZZATO.
+React/ReactDOM 18.3.1 sono distribuiti localmente con le rispettive licenze MIT:
+nessuna CDN viene contattata dal televisore. JavaScript normale con `createElement`,
+senza JSX/transpiler; CSS statico senza build Tailwind.
+
+## Struttura
+
+- `app/`: normalizzazione BRM, archivio, controller e pagina HTML.
+- `public/`: unica document root pubblica, frontend React, CSS e logo.
+- `config/local.example.php`: impostazioni da copiare sul server.
+- `data/`: database e log privati, ignorati da Git.
+- `tests/`: suite PHP e test browser opzionale.
+- `scripts/simulate.php`: prenotazioni sintetiche inviate tramite HTTP.
+
+Il database mantiene le tabelle della precedente versione. Prima di migrare un
+archivio reale effettuare un backup SQLite coerente e provarne una copia; non
+cancellare la cartella `data/` durante il deploy. La cronologia Git conserva la
+precedente implementazione Next.js. I vecchi `node_modules`/`.next` locali possono
+essere rimossi: non sono utilizzati dal progetto PHP.
