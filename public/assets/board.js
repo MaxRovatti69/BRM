@@ -1,6 +1,8 @@
 /* React runs in the browser. Plain JavaScript: no JSX compiler or Node build. */
 'use strict';
 (() => {
+  const texts = JSON.parse(document.getElementById('board-texts').textContent);
+  const format = (text, values) => text.replace(/\{(\w+)\}/g, (match, key) => Object.hasOwn(values, key) ? String(values[key]) : match);
   const h = React.createElement;
   const { useState, useEffect } = React;
   const dot = () => h('span', { className: 'live-dot', 'aria-hidden': true });
@@ -43,7 +45,7 @@
     }, []);
     const toggleFullscreen = async () => {
       try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); setError(''); }
-      catch { setError('Schermo intero non disponibile. Usa F11 sul televisore.'); }
+      catch { setError(texts.errore_schermo_intero); }
     };
     const allRows = data?.reservations.flatMap(b => b.products.map((p, i) => ({...b, id:`${b.id}-${i}`, product:p.name, quantity:p.quantity}))) ?? [];
     const pageCount = Math.max(1, Math.ceil(allRows.length / 8));
@@ -56,27 +58,27 @@
     const renderedRows = rows.map(b => h('tr', {key:b.id, className:b.status === 'IN CONSEGNA' ? 'active-row' : b.status === 'PARTITO' ? 'departed-row' : ''},
       h('td', null, h(Flap, {text:b.time, kind:'time-flaps'})),
       h('td', null, h(Flap, {text:b.client, kind:'client-flaps'})),
-      h('td', null, h('div', {className:'product-cell flex items-center justify-between gap-2'}, h(Flap, {text:b.product}), h('span', {className:'quantity', 'aria-label':`${b.quantity} prodotti`}, `×${b.quantity}`))),
+      h('td', null, h('div', {className:'product-cell flex items-center justify-between gap-2'}, h(Flap, {text:b.product}), h('span', {className:'quantity', 'aria-label':format(texts.quantita_prodotti, {count:b.quantity})}, `×${b.quantity}`))),
       h('td', null, h('span', {className:`status status-${b.status.toLowerCase().replaceAll(' ', '-')}`}, h('span', {className:'status-dot'}), h('span', {className:'status-label', key:b.status}, b.status)))));
-    if (!rows.length) renderedRows.push(h('tr', {key:'message'}, h('td', {colSpan:4, className:'empty-board'}, !data ? (offline ? 'COLLEGAMENTO NON DISPONIBILE' : 'CARICAMENTO PRENOTAZIONI…') : 'NESSUNA PARTENZA PER OGGI')));
+    if (!rows.length) renderedRows.push(h('tr', {key:'message'}, h('td', {colSpan:4, className:'empty-board'}, !data ? (offline ? texts.connessione_assente : texts.caricamento) : texts.nessuna_partenza)));
     for (let i = Math.max(1, rows.length); i < 8; i++) renderedRows.push(h('tr', {key:`empty-${i}`, 'aria-hidden':true}, h('td', {colSpan:4})));
     return h('main', {className:'board-shell min-h-screen'},
       h('header', {className:'masthead flex items-center justify-between gap-6'},
-        h('div', {className:'brand flex items-center gap-5'}, h('img', {className:'brand-logo', src:'/assets/binario-zero.png', alt:'Binario Zero', width:252, height:60}), h('span', {className:'brand-description'}, 'BIKE RENTAL', h('br'), 'DEPARTURE BOARD')),
-        h('div', {className:'station-label hidden md:flex items-center gap-3'}, dot(), 'IL TUO VIAGGIO INIZIA QUI'),
-        h('button', {className:'fullscreen-button', onClick:toggleFullscreen, 'aria-label':fullscreen ? 'Esci da schermo intero' : 'Attiva schermo intero'}, h('span', {'aria-hidden':true}, '⛶'), h('span', null, fullscreen ? 'RIDUCI' : 'SCHERMO INTERO'))),
-      h('section', {className:'departure-heading flex items-end justify-between gap-5', 'aria-label':'Informazioni partenze'},
-        h('div', null, h('div', {className:'eyebrow flex items-center gap-3'}, h('svg', {width:36,height:25,viewBox:'0 0 48 32',fill:'none','aria-hidden':true}, h('circle',{cx:10,cy:22,r:8,stroke:'currentColor',strokeWidth:2.5}),h('circle',{cx:38,cy:22,r:8,stroke:'currentColor',strokeWidth:2.5}),h('path',{d:'m10 22 10-17 10 17H10m10-17h7m3 17-6-19h7',stroke:'currentColor',strokeWidth:2.5,strokeLinejoin:'round'})), 'NOLEGGIO BICICLETTE'), h('h1', null, 'PARTENZE', h('span', {className:'heading-arrow', 'aria-hidden':true}, h('svg', {width:48, height:48, viewBox:'0 0 48 48', fill:'none'}, h('path', {d:'M10 38 38 10M10 10h28v28', stroke:'currentColor', strokeWidth:4})))), h('p', {className:'subtitle'}, 'PROSSIME AVVENTURE, UN PEDALE ALLA VOLTA.')),
+        h('div', {className:'brand flex items-center gap-5'}, h('img', {className:'brand-logo', src:'/assets/binario-zero.png', alt:texts.logo_alt, width:252, height:60}), h('span', {className:'brand-description'}, texts.marchio_riga1, h('br'), texts.marchio_riga2)),
+        h('div', {className:'station-label hidden md:flex items-center gap-3'}, dot(), texts.motto),
+        h('button', {className:'fullscreen-button', onClick:toggleFullscreen, 'aria-label':fullscreen ? texts.riduci_schermo_accessibile : texts.schermo_intero_accessibile}, h('span', {'aria-hidden':true}, '⛶'), h('span', null, fullscreen ? texts.riduci_schermo : texts.schermo_intero))),
+      h('section', {className:'departure-heading flex items-end justify-between gap-5', 'aria-label':texts.descrizione_partenze},
+        h('div', null, h('div', {className:'eyebrow flex items-center gap-3'}, h('svg', {width:36,height:25,viewBox:'0 0 48 32',fill:'none','aria-hidden':true}, h('circle',{cx:10,cy:22,r:8,stroke:'currentColor',strokeWidth:2.5}),h('circle',{cx:38,cy:22,r:8,stroke:'currentColor',strokeWidth:2.5}),h('path',{d:'m10 22 10-17 10 17H10m10-17h7m3 17-6-19h7',stroke:'currentColor',strokeWidth:2.5,strokeLinejoin:'round'})), texts.categoria), h('h1', null, texts.titolo, h('span', {className:'heading-arrow', 'aria-hidden':true}, h('svg', {width:48, height:48, viewBox:'0 0 48 48', fill:'none'}, h('path', {d:'M10 38 38 10M10 10h28v28', stroke:'currentColor', strokeWidth:4})))), h('p', {className:'subtitle'}, texts.sottotitolo)),
         h('div', {className:'time-block text-right'}, h('time', {className:'clock', dateTime:now.toISOString()}, clock), h('p', {className:'date'}, date))),
       h('div', {className:'board-frame'}, h('div', {className:'board-screw screw-left'}), h('div', {className:'board-screw screw-right'}),
-        h('div', {className:'table-scroll'}, h('table', {className:'departure-table w-full', 'aria-label':'Prenotazioni di oggi'},
+        h('div', {className:'table-scroll'}, h('table', {className:'departure-table w-full', 'aria-label':texts.descrizione_tabella},
           h('colgroup', null, ...['time','client','product','status'].map(c => h('col', {className:`col-${c}`, key:c}))),
-          h('thead', null, h('tr', null, ...[['ORA','TIME'],['CLIENTE','CUSTOMER'],['BICICLETTA / PRODOTTO','BIKE / PRODUCT'],['STATO','STATUS']].map(([it,en]) => h('th', {scope:'col', key:it}, it, h('span', null, en))))), h('tbody', null, ...renderedRows))),
-        h('div', {className:'board-bottom flex items-center justify-between'}, h('span', null, dot(), offline ? 'NON SINCRONIZZATO' : 'TABELLONE ATTIVO'), h('span', null, `${String(data?.reservations.length ?? 0).padStart(2, '0')} PRENOTAZIONI · OGGI${pageCount > 1 ? ` · PAG. ${pageIndex + 1}/${pageCount}` : ''}`))),
+          h('thead', null, h('tr', null, ...[[texts.colonna_ora,texts.colonna_ora_en],[texts.colonna_cliente,texts.colonna_cliente_en],[texts.colonna_prodotto,texts.colonna_prodotto_en],[texts.colonna_stato,texts.colonna_stato_en]].map(([it,en]) => h('th', {scope:'col', key:it}, it, h('span', null, en))))), h('tbody', null, ...renderedRows))),
+        h('div', {className:'board-bottom flex items-center justify-between'}, h('span', null, dot(), offline ? texts.non_sincronizzato : texts.sincronizzato), h('span', null, format(texts.riepilogo, {count:String(data?.reservations.length ?? 0).padStart(2, '0')}) + (pageCount > 1 ? format(texts.paginazione, {page:pageIndex + 1, pages:pageCount}) : '')))),
       h('footer', {className:'footer flex items-center justify-between gap-5'},
-        h('div', {className:'footer-message'}, h('span', {className:'info-icon'}, 'i'), 'IL PERSONALE È A DISPOSIZIONE PER IL RITIRO DELLA TUA BICICLETTA.'),
-        h('div', {className:'update-info'}, h('span', {className:'demo-badge'}, data?.mode === 'live' ? 'LIVE' : data?.mode === 'demo' ? 'DEMO' : '…'), h('span', null, `AGGIORNATO ${updated}`, h('span', {className:'refresh-note'}, ' · AUTO 5 S')))),
-      h('p', {className:'demo-note'}, data?.mode === 'live' ? 'PRENOTAZIONI BRM · ORARI LOCALI DEL NEGOZIO' : data?.mode === 'demo' ? 'PRENOTAZIONI E STATI SIMULATI · NESSUN DATO REALE' : 'IN ATTESA DEL TABELLONE'),
+        h('div', {className:'footer-message'}, h('span', {className:'info-icon'}, 'i'), texts.messaggio_footer),
+        h('div', {className:'update-info'}, h('span', {className:'demo-badge'}, data?.mode === 'live' ? texts.etichetta_live : data?.mode === 'demo' ? texts.etichetta_demo : texts.etichetta_attesa), h('span', null, format(texts.aggiornamento, {time:updated}), h('span', {className:'refresh-note'}, format(texts.aggiornamento_automatico, {seconds:5}))))),
+      h('p', {className:'demo-note'}, data?.mode === 'live' ? texts.nota_live : data?.mode === 'demo' ? texts.nota_demo : texts.nota_attesa),
       error && h('p', {className:'fullscreen-error', role:'status'}, error));
   }
   ReactDOM.createRoot(document.getElementById('root')).render(h(Board));

@@ -19,6 +19,30 @@ Aprire `/board` sulla porta **8080**. In Codespaces inoltrare quella porta.
 La modalità predefinita è DEMO: otto prenotazioni sintetiche, nessun dato reale.
 Il server PHP integrato è per sviluppo; per produzione usare Apache o Nginx con PHP-FPM.
 
+
+## Modificare i testi della dashboard
+
+Le scritte fisse si modificano in **`config/texts.php`**: titolo, sottotitolo,
+header, colonne, pulsanti, messaggi, footer e titolo della scheda del browser.
+Ad esempio:
+
+```php
+'titolo' => 'PARTENZE',
+'sottotitolo' => 'LA TUA PROSSIMA AVVENTURA INIZIA QUI.',
+'messaggio_footer' => 'RITIRA LA TUA BICICLETTA AL BANCO.',
+```
+
+Cambiare solo i valori tra apici, conservando chiavi, virgole e segnaposto come
+`{count}`, `{page}`, `{pages}`, `{time}` e `{seconds}`. Per un apostrofo usare `\'`.
+Sono testi semplici, non HTML. Usare frasi brevi per mantenerle leggibili sul TV.
+Dopo il salvataggio e il caricamento del file sul server, ricaricare `/board`
+(Ctrl+F5 se necessario): non serve compilare o riavviare il server di sviluppo.
+Se l'hosting tiene in cache i file PHP con OPcache, applicare la sua procedura di
+aggiornamento della cache. Controllare la sintassi con `php -l config/texts.php`.
+
+Questa configurazione non modifica nomi clienti, prodotti, orari o stati delle
+prenotazioni. Le impostazioni tecniche restano in `config/local.php`.
+
 ## Prenotazioni reali
 
 Copiare `config/local.example.php` in `config/local.php` **solo se quest'ultimo non

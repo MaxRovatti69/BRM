@@ -39,7 +39,7 @@ final class Application
             if ($this->config['BOARD_USERNAME'] === '' || strlen($this->config['BOARD_PASSWORD']) < 16) return $this->json(503, ['error' => 'board_not_configured']);
             if (!$this->authorized($headers)) return $this->json(401, ['error' => 'authentication_required'], ['WWW-Authenticate' => 'Basic realm="Binario Zero", charset="UTF-8"']);
         }
-        if ($path === '/board') return new Response(200, ['Content-Type' => 'text/html; charset=utf-8', 'Cache-Control' => 'private, no-store'], file_get_contents(__DIR__ . '/board.html'));
+        if ($path === '/board') return new Response(200, ['Content-Type' => 'text/html; charset=utf-8', 'Cache-Control' => 'private, no-store'], renderBoard());
         try {
             if ($this->config['BOARD_MODE'] === 'demo') $reservations = self::demo();
             else {

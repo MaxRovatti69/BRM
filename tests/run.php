@@ -82,5 +82,17 @@ check('Demo/live separation, health, redirect and nonpublic paths', function() {
     same(count(json_decode($app->handle('GET','/api/board')->body,true)['reservations']),8);
     same($app->handle('GET','/board')->status,200); same($app->handle('GET','/api/health')->status,200); same($app->handle('GET','/')->status,302); same($app->handle('GET','/data/db.sqlite')->status,404);
 });
+check('Editable texts preserve Unicode and cannot inject scripts or HTML', function() {
+    $texts=require dirname(__DIR__).'/config/texts.php';
+    $custom="L'avventura è qui </script><script>alert(1)</script>";
+    $texts['titolo']=$custom; $texts['titolo_scheda']=$custom;
+    $texts['descrizione_scheda']='" onload="alert(1)';
+    $html=BinarioZero\renderBoard($texts);
+    same(str_contains($html,'<script>alert(1)</script>'),false);
+    same(str_contains($html,'<title>'.htmlspecialchars($custom,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8').'</title>'),true);
+    preg_match('~<script id="board-texts" type="application/json">(.*?)</script>~s',$html,$match);
+    same(json_decode($match[1],true,32,JSON_THROW_ON_ERROR)['titolo'],$custom);
+    same(str_contains($html,'content="&quot; onload=&quot;alert(1)"'),true);
+});
 echo "$passed tests passed\n";
 } finally { foreach (glob($dir.'/*') as $file) unlink($file); rmdir($dir); }

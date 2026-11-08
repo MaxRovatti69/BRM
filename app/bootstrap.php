@@ -5,6 +5,7 @@ namespace BinarioZero;
 
 require_once __DIR__ . '/Reservations.php';
 require_once __DIR__ . '/Application.php';
+require_once __DIR__ . '/Texts.php';
 
 function configuration(): array
 {

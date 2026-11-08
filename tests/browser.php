@@ -61,7 +61,11 @@ try {
  check(document.documentElement.scrollWidth===1920,'Horizontal Full HD overflow');
  check(document.documentElement.scrollHeight===1080,'Vertical Full HD overflow');
  check(getComputedStyle(document.querySelector('.flap-text')).color==='rgb(255, 87, 0)','Wrong logo orange');
- check(document.querySelector('.demo-badge').textContent==='DEMO','Demo label missing');
+ const texts=JSON.parse(document.getElementById('board-texts').textContent);
+ check(document.querySelector('.demo-badge').textContent===texts.etichetta_demo,'Configured demo label missing');
+ check(document.querySelector('h1').textContent===texts.titolo,'Configured title missing');
+ check(document.querySelector('.footer-message').textContent.includes(texts.messaggio_footer),'Configured footer missing');
+ check(!document.querySelector('.refresh-note').textContent.includes('{seconds}'),'Refresh placeholder was not replaced');
  return {clock:document.querySelector('.clock').textContent,rows:8};
 })()
 JS);
