@@ -5,29 +5,29 @@
 // I testi sono testo semplice: HTML e JavaScript non vengono eseguiti.
 return [
     // Scheda del browser e accessibilità.
-    'titolo_scheda' => 'Binario Zero · Bike Rental Departure Board',
-    'descrizione_scheda' => 'Il tabellone delle partenze di Binario Zero.',
+    'titolo_scheda' => 'Binario Zero · Bike & Vespa Rental Departure Board',
+    'descrizione_scheda' => 'The departure board at Binario Zero.',
     'javascript_disattivato' => 'Attiva JavaScript nel browser per visualizzare il tabellone.',
     'logo_alt' => 'Binario Zero',
-    'descrizione_partenze' => 'Informazioni partenze',
-    'descrizione_tabella' => 'Prenotazioni di oggi',
+    'descrizione_partenze' => 'Departure Information',
+    'descrizione_tabella' => 'Today Reservation',
     'quantita_prodotti' => '{count} prodotti',
 
     // Header e titolo principale.
-    'marchio_riga1' => 'BIKE RENTAL',
+    'marchio_riga1' => 'BIKE & VESPA RENTAL',
     'marchio_riga2' => 'DEPARTURE BOARD',
-    'motto' => 'IL TUO VIAGGIO INIZIA QUI',
-    'categoria' => 'NOLEGGIO BICICLETTE',
-    'titolo' => 'PARTENZE',
-    'sottotitolo' => 'PROSSIME AVVENTURE, UN PEDALE ALLA VOLTA.',
+    'motto' => 'YOUR JOURNEY BEGINS HERE',
+    'categoria' => 'RENT BIKE & VESPA',
+    'titolo' => 'DEPARTURE',
+    'sottotitolo' => 'YOUR ADVENTURE IS ABOUT TO BEGIN',
 
     // Intestazioni delle colonne (riga principale e traduzione).
     'colonna_ora' => 'ORA',
     'colonna_ora_en' => 'TIME',
     'colonna_cliente' => 'CLIENTE',
     'colonna_cliente_en' => 'CUSTOMER',
-    'colonna_prodotto' => 'BICICLETTA / PRODOTTO',
-    'colonna_prodotto_en' => 'BIKE / PRODUCT',
+    'colonna_prodotto' => 'BICICLETTA / VESPA',
+    'colonna_prodotto_en' => 'BIKE / VESPA',
     'colonna_stato' => 'STATO',
     'colonna_stato_en' => 'STATUS',
 
@@ -48,7 +48,7 @@ return [
     'errore_schermo_intero' => 'Schermo intero non disponibile. Usa F11 sul televisore.',
 
     // Footer e indicazioni sulla provenienza dei dati.
-    'messaggio_footer' => 'IL PERSONALE È A DISPOSIZIONE PER IL RITIRO DELLA TUA BICICLETTA.',
+    'messaggio_footer' => 'STAFF ARE AVAILABLE FOR PICK-UP.',
     'etichetta_live' => 'LIVE',
     'etichetta_demo' => 'DEMO',
     'etichetta_attesa' => '…',
